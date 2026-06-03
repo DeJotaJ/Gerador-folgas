@@ -5,63 +5,93 @@ import { useState } from 'react'
 
 export default function App() {
 
-  const [dia1, setDia1] = useState("");
-  const [dia2, setDia2] = useState("");
-  const [resultado, setResultado] = useState([]);
+  // Verifica se o ano mudou ANTES de criar os estados
+  const anoAtual = new Date().getFullYear();
+  const anoSalvo = localStorage.getItem("anoFolgas");
+
+  if (anoSalvo && Number(anoSalvo) !== anoAtual) {
+    localStorage.removeItem("folgas");
+    localStorage.removeItem("dia1");
+    localStorage.removeItem("dia2");
+    localStorage.removeItem("anoFolgas");
+  }
+
+  const [dia1, setDia1] = useState(() =>
+    localStorage.getItem("dia1") || ""
+  );
+
+  const [dia2, setDia2] = useState(() =>
+    localStorage.getItem("dia2") || ""
+  );
+
+  const [resultado, setResultado] = useState(() => {
+    const folgasSalvas = localStorage.getItem("folgas");
+    return folgasSalvas ? JSON.parse(folgasSalvas) : [];
+  });
 
   function gerarDatas() {
-  if (!dia1 || !dia2) return;
+    if (!dia1 || !dia2) return;
 
-  const [d1, m1] = dia1.split("/").map(Number);
-  const [d2, m2] = dia2.split("/").map(Number);
+    const [d1, m1] = dia1.split("/").map(Number);
+    const [d2, m2] = dia2.split("/").map(Number);
 
-  const ano = new Date().getFullYear();
+    const anoAtual = new Date().getFullYear();
 
-  const data1 = new Date(ano, m1 - 1, d1);
-  const data2 = new Date(ano, m2 - 1, d2);
+    const data1 = new Date(anoAtual, m1 - 1, d1);
+    const data2 = new Date(anoAtual, m2 - 1, d2);
 
-  // valida se são dias seguidos
-  const diffEmDias =
-    (data2 - data1) / (1000 * 60 * 60 * 24);
+    const diffEmDias =
+      (data2 - data1) / (1000 * 60 * 60 * 24);
 
-  if (diffEmDias !== 1) {
-    alert("Os dias precisam ser seguidos. Ex: 31/05 e 01/06");
-    return;
+    if (diffEmDias !== 1) {
+      alert("Os dias precisam ser seguidos. Ex: 31/05 e 01/06");
+      return;
+    }
+
+    let pares = [];
+
+    let inicio = new Date(data2);
+    inicio.setDate(inicio.getDate() + 3);
+
+    while (inicio.getFullYear() === anoAtual) {
+      let fim = new Date(inicio);
+      fim.setDate(fim.getDate() + 1);
+
+      pares.push(
+        `${String(inicio.getDate()).padStart(2, "0")}/${String(
+          inicio.getMonth() + 1
+        ).padStart(2, "0")} - ${String(
+          fim.getDate()
+        ).padStart(2, "0")}/${String(
+          fim.getMonth() + 1
+        ).padStart(2, "0")}`
+      );
+
+      inicio.setDate(inicio.getDate() + 4);
+
+      if (inicio.getFullYear() !== anoAtual) {
+        break;
+      }
+    }
+
+    setResultado(pares);
+
+    localStorage.setItem("folgas", JSON.stringify(pares));
+    localStorage.setItem("dia1", dia1);
+    localStorage.setItem("dia2", dia2);
+    localStorage.setItem("anoFolgas", anoAtual.toString());
   }
 
-  // limite: 30/31 dias depois do primeiro
-  const limite = new Date(data1);
-  limite.setMonth(limite.getMonth() + 1);
+  function limparDados() {
+    localStorage.removeItem("folgas");
+    localStorage.removeItem("dia1");
+    localStorage.removeItem("dia2");
+    localStorage.removeItem("anoFolgas");
 
-  let pares = [];
-
-  // começa 3 dias depois do segundo
-  let inicio = new Date(data2);
-  inicio.setDate(inicio.getDate() + 3);
-
-  while (inicio <= limite) {
-    let fim = new Date(inicio);
-    fim.setDate(fim.getDate() + 1);
-
-    // evita incluir se passar do limite
-    if (fim > limite) break;
-
-    pares.push(
-      `${String(inicio.getDate()).padStart(2, "0")}/${String(
-        inicio.getMonth() + 1
-      ).padStart(2, "0")} - ${String(
-        fim.getDate()
-      ).padStart(2, "0")}/${String(
-        fim.getMonth() + 1
-      ).padStart(2, "0")}`
-    );
-
-    // próximo bloco com intervalo de 2 dias
-    inicio.setDate(inicio.getDate() + 4);
+    setResultado([]);
+    setDia1("");
+    setDia2("");
   }
-
-  setResultado(pares);
-}
 
   return (
     <div className='w-full min-h-screen py-8 flex justify-center bg-[#BB3BEE] overflow-x-hidden'>
@@ -90,10 +120,11 @@ export default function App() {
 
         <button
           onClick={gerarDatas}
-          className="w-full bg-white text-purple-700 uppercase rounded-xl py-3 font-medium hover:bg-purple-900 hover:text-white transition"
+          className="w-full my-2 bg-white text-purple-700 uppercase rounded-xl py-3 font-medium hover:bg-purple-900 hover:text-white transition"
         >
           Gerar Datas
         </button>
+        
 
         {resultado.length > 0 && (
           <div className="mt-6 bg-gray-50 rounded-xl p-4">
@@ -111,6 +142,12 @@ export default function App() {
             </ul>
           </div>
         )}
+        <button
+          onClick={limparDados}
+          className="w-full my-2 bg-purple-700 text-zinc-50 uppercase rounded-xl py-3 font-medium hover:bg-zinc-200 hover:text-purple-700 transition"
+        >
+          Limpar Dados
+        </button>
       </div>
     </div>
   )
