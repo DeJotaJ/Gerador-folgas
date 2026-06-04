@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom'
 import './App.css'
 import './index.css'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import SplashScreen from './components/SplashScreen';
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function App() {
 
@@ -93,62 +95,138 @@ export default function App() {
     setDia2("");
   }
 
+  const nomesMeses = [
+    "Janeiro",
+    "Fevereiro",
+    "Março",
+    "Abril",
+    "Maio",
+    "Junho",
+    "Julho",
+    "Agosto",
+    "Setembro",
+    "Outubro",
+    "Novembro",
+    "Dezembro",
+  ];
+
+  const folgasPorMes = resultado.reduce((acc, folga) => {
+    const dataInicial = folga.split(" - ")[0];
+    const [, mes] = dataInicial.split("/");
+
+    if (!acc.has(mes)) {
+      acc.set(mes, []);
+    }
+
+    acc.get(mes).push(folga);
+
+    return acc;
+  }, new Map());
+
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setLoading(false);
+    }, 2000);
+
+    return () => clearTimeout(timeout);
+  }, []);
+
   return (
-    <div className='w-full min-h-screen py-8 flex justify-center bg-[#BB3BEE] overflow-x-hidden'>
-      <div className="bg-[#BB3BEE] rounded-xl p-8 w-full max-w-lg overflow-x-hidden">
-        <h1 className="text-2xl uppercase text-white font-bold mb-8 text-center">
-          Gerador de Folgas
-        </h1>
 
-        <div className="grid grid-cols-2 gap-16 space-between mb-4">
-          <input
-            type="text"
-            placeholder="01/06"
-            value={dia1}
-            onChange={(e) => setDia1(e.target.value)}
-            className="border border-white bg-white text-center rounded-xl p-1.5 text-[#161616] text-lg font-medium focus:outline-none focus:ring-2 focus:ring-purple-400"
-          />
+    <>
+      {loading && <SplashScreen />}
 
-          <input
-            type="text"
-            placeholder="02/06"
-            value={dia2}
-            onChange={(e) => setDia2(e.target.value)}
-            className="border border-white bg-white text-center rounded-xl p-1.5 text-[#161616] text-lg font-medium focus:outline-none focus:ring-2 focus:ring-purple-400"
-          />
-        </div>
+      <AnimatePresence>
 
-        <button
-          onClick={gerarDatas}
-          className="w-full my-2 bg-white text-purple-700 uppercase rounded-xl py-3 font-medium hover:bg-purple-900 hover:text-white transition"
-        >
-          Gerar Datas
-        </button>
-        
+        {!loading && (
+          <motion
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+            className="inset-0 bg-[#121212]"
+          >
 
-        {resultado.length > 0 && (
-          <div className="mt-6 bg-gray-50 rounded-xl p-4">
-            <h2 className="font-semibold mb-3 text-purple-950 uppercase">Resultado:</h2>
+            <div className='w-full min-h-screen py-8 flex justify-center bg-[#BB3BEE] overflow-x-hidden'>
+              <div className="bg-[#BB3BEE] rounded-xl p-8 w-full max-w-lg overflow-x-hidden">
+                <h1 className="text-2xl uppercase text-white font-bold mb-8 text-center">
+                  Gerador de Folgas
+                </h1>
 
-            <ul className="space-y-2">
-              {resultado.map((item, index) => (
-                <li
-                  key={index}
-                  className="bg-white border border-purple-950 font-medium text-lg text-center text-purple-950 rounded-lg p-2"
-                >
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
+                <div className="grid grid-cols-2 gap-16 space-between mb-4">
+                  <input
+                    type="text"
+                    placeholder="01/06"
+                    value={dia1}
+                    onChange={(e) => setDia1(e.target.value)}
+                    className="border border-white bg-white text-center rounded-xl p-1.5 text-[#BB3BEE] text-lg font-medium focus:outline-none focus:ring-2 focus:ring-purple-400"
+                  />
+
+                  <input
+                    type="text"
+                    placeholder="02/06"
+                    value={dia2}
+                    onChange={(e) => setDia2(e.target.value)}
+                    className="border border-white bg-white text-center rounded-xl p-1.5 text-[#BB3BEE] text-lg font-medium focus:outline-none focus:ring-2 focus:ring-purple-400"
+                  />
+                </div>
+
+                <button
+                  onClick={gerarDatas}
+                  className="w-full my-1 border-2 bg-white text-[#BB3BEE] uppercase rounded-xl py-2.5 font-medium hover:bg-[#BB3BEE] hover:text-white hover:border-2 border-white transition"
+                  >
+                  Gerar Datas
+                </button>
+                
+
+                {resultado.length > 0 && (
+                  <div className="mt-4 space-y-4">
+
+                    <h2 className="font-bold text-white text-center text-xl uppercase">
+                      Suas Folgas
+                    </h2>
+
+                    {Array.from(folgasPorMes.entries()).map(([mes, folgas]) => (
+                      <div
+                      key={mes}
+                      className="bg-white backdrop-blur-sm shadow shadow-black/50 rounded-2xl p-4"
+                      >
+                          <div className="flex items-center justify-center gap-2 mb-4">
+                            <div className="h-8 w-1 rounded-full bg-white/0" />
+
+                            <h3 className="text-xl font-bold text-purple-500">
+                              {nomesMeses[Number(mes) - 1]}
+                            </h3>
+                          </div>
+
+                          <div className="grid grid-cols-1 gap-2">
+                            {folgas.map((folga, index) => (
+                              <div
+                              key={index}
+                              className="bg-purple-500 rounded-xl py-2.5 px-4 text-center font-bold text-white hover:shadow shadow-black/75"
+                              >
+                                {folga}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )
+                    )}
+                  </div>
+                )}
+                <button
+                  onClick={limparDados}
+                  className="w-full my-2 border-2 bg-white text-[#BB3BEE] uppercase rounded-xl py-2.5 font-medium hover:bg-[#BB3BEE] hover:text-white hover:border-2 border-white transition"
+                  >
+                  Limpar Dados
+                </button>
+              </div>
+            </div>
+          </motion>
         )}
-        <button
-          onClick={limparDados}
-          className="w-full my-2 bg-purple-700 text-zinc-50 uppercase rounded-xl py-3 font-medium hover:bg-zinc-200 hover:text-purple-700 transition"
-        >
-          Limpar Dados
-        </button>
-      </div>
-    </div>
+      </AnimatePresence>
+    
+    </>
   )
 }
