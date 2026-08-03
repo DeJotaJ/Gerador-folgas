@@ -3,7 +3,7 @@ import './App.css'
 import './index.css'
 import { useEffect, useState } from 'react'
 import SplashScreen from './components/SplashScreen';
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 
 export default function App() {
 
@@ -55,6 +55,17 @@ export default function App() {
     let inicio = new Date(data2);
     inicio.setDate(inicio.getDate() + 3);
 
+    const hoje = new Date();
+
+    // Pula todas as folgas dos meses anteriores ao mês atual
+    while (
+      inicio.getFullYear() === hoje.getFullYear() &&
+      inicio.getMonth() < hoje.getMonth()
+    ) {
+      inicio.setDate(inicio.getDate() + 4);
+    }
+
+    // Esse while continua igual
     while (inicio.getFullYear() === anoAtual) {
       let fim = new Date(inicio);
       fim.setDate(fim.getDate() + 1);
@@ -62,9 +73,7 @@ export default function App() {
       pares.push(
         `${String(inicio.getDate()).padStart(2, "0")}/${String(
           inicio.getMonth() + 1
-        ).padStart(2, "0")} - ${String(
-          fim.getDate()
-        ).padStart(2, "0")}/${String(
+        ).padStart(2, "0")} - ${String(fim.getDate()).padStart(2, "0")}/${String(
           fim.getMonth() + 1
         ).padStart(2, "0")}`
       );
