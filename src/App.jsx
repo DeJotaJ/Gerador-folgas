@@ -145,7 +145,7 @@ export default function App() {
 
   return (
 
-    <>
+    <Analytics>
       {loading && <SplashScreen />}
 
       <AnimatePresence>
@@ -237,6 +237,6 @@ export default function App() {
         )}
       </AnimatePresence>
     
-    </>
+    </Analytics>
   )
 }
