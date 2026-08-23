@@ -4,6 +4,7 @@ import './index.css'
 import { useEffect, useState } from 'react'
 import SplashScreen from './components/SplashScreen';
 import { AnimatePresence } from "framer-motion";
+import { Analytics } from "@vercel/analytics/react"
 
 export default function App() {
 
