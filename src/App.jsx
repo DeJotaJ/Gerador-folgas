@@ -138,14 +138,14 @@ export default function App() {
   useEffect(() => {
     const timeout = setTimeout(() => {
       setLoading(false);
-    }, 2000);
+    }, 1000);
 
     return () => clearTimeout(timeout);
   }, []);
 
   return (
 
-    <Analytics>
+    <>
       {loading && <SplashScreen />}
 
       <AnimatePresence>
@@ -236,7 +236,7 @@ export default function App() {
           </motion>
         )}
       </AnimatePresence>
-    
-    </Analytics>
+      <Analytics/>
+    </>
   )
 }
